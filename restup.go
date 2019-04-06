@@ -41,7 +41,7 @@ func (rup *RestUp) Get(url string, out interface{}) error {
 		return reqErr
 	}
 
-	req.Header.Set("Authorization", rup.authToken))
+	req.Header.Set("Authorization", rup.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	return rup.doRequestToJSON(req, out)
@@ -81,7 +81,7 @@ func (rup *RestUp) doRequestToJSON(req *http.Request, out interface{}) error {
 
 	jsonErr := json.Unmarshal(body, out)
 	if jsonErr != nil {
-		return mt.Errorf("Error decodeing JSONL %s", jsonErr)
+		return fmt.Errorf("Error decodeing JSONL %s", jsonErr)
 	}
 
 	return nil
