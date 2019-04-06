@@ -1,3 +1,3 @@
-module github.com/SimonOnebyte/restup
+module github.com/simononebyte/restup
 
 go 1.12
