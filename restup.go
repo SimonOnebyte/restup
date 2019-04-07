@@ -36,7 +36,7 @@ func (rup *RestUp) SetHTTPClient(client *http.Client) {
 // Get performs the requested API Get returning the results as JSON
 func (rup *RestUp) Get(cmd string, out interface{}) error {
 
-	url := fmt.Sprintf("%s%s", rup.baseURL, cmd)
+	url := rup.baseURL + cmd
 	req, reqErr := http.NewRequest(http.MethodGet, url, nil)
 	if reqErr != nil {
 		return reqErr
@@ -54,7 +54,7 @@ func (rup *RestUp) Post(cmd string, query interface{}, out interface{}) error {
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(query)
 
-	url := fmt.Sprintf("%s%s", rup.baseURL, cmd)
+	url := rup.baseURL + cmd
 	req, reqErr := http.NewRequest(http.MethodPost, url, b)
 	if reqErr != nil {
 		return reqErr
