@@ -28,9 +28,9 @@ func NewRestUp(baseURL string, token string) *RestUp {
 	return &rup
 }
 
-// SetHTTPClient allows you to supply a custom HTTP client, useful for testing
-func (rup *RestUp) SetHTTPClient(client *http.Client) {
-	rup.client = client
+// TransportIntercept allows you to supply a custom HTTP client, useful for testing
+func (rup *RestUp) TransportIntercept(rt http.RoundTripper) {
+	rup.client.Transport = rt
 }
 
 // Get performs the requested API Get returning the results as JSON
