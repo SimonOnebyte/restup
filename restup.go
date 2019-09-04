@@ -15,6 +15,7 @@ type RestUp struct {
 	baseURL   string
 	authToken string
 	client    *http.Client
+	headers   map[string]string
 }
 
 // NewRestUp returns a new RestUp with the authentication token encoded
@@ -25,6 +26,8 @@ func NewRestUp(baseURL string, token string) *RestUp {
 	rup.client = &http.Client{
 		Timeout: time.Second * 30,
 	}
+	rup.headers = make(map[string]string)
+
 	return &rup
 }
 
@@ -33,15 +36,21 @@ func (rup *RestUp) SetHTTPClient(client *http.Client) {
 	rup.client = client
 }
 
-// Get performs the requested API Get returning the results as JSON
-func (rup *RestUp) Get(cmd string, out interface{}) error {
+// AddHeader allows additional headers to be added to the API request
+func (rup *RestUp) AddHeader(name, value string) {
+	rup.headers[name] = value
+}
 
-	url := rup.baseURL + cmd
+// Get performs the requested API Get returning the results as JSON
+func (rup *RestUp) Get(action string, out interface{}) error {
+
+	url := rup.baseURL + action
 	req, reqErr := http.NewRequest(http.MethodGet, url, nil)
 	if reqErr != nil {
 		return reqErr
 	}
 
+	rup.setReqHeaders(req)
 	req.Header.Set("Authorization", rup.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -49,17 +58,18 @@ func (rup *RestUp) Get(cmd string, out interface{}) error {
 }
 
 // Post performs the requested API Post returning the results as JSON
-func (rup *RestUp) Post(cmd string, query interface{}, out interface{}) error {
+func (rup *RestUp) Post(action string, query interface{}, out interface{}) error {
 
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(query)
+	body := new(bytes.Buffer)
+	json.NewEncoder(body).Encode(query)
 
-	url := rup.baseURL + cmd
-	req, reqErr := http.NewRequest(http.MethodPost, url, b)
+	url := rup.baseURL + action
+	req, reqErr := http.NewRequest(http.MethodPost, url, body)
 	if reqErr != nil {
 		return reqErr
 	}
 
+	rup.setReqHeaders(req)
 	req.Header.Set("Authorization", rup.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -87,4 +97,12 @@ func (rup *RestUp) doRequestToJSON(req *http.Request, out interface{}) error {
 	}
 
 	return nil
+}
+
+func (rup *RestUp) setReqHeaders(req *http.Request) {
+	if len(rup.headers) > 0 {
+		for k, v := range rup.headers {
+			req.Header.Set(k, v)
+		}
+	}
 }
