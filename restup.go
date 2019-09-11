@@ -64,6 +64,7 @@ func (rup *RestUp) Post(action string, query interface{}, out interface{}) error
 	json.NewEncoder(body).Encode(query)
 
 	url := rup.baseURL + action
+
 	req, reqErr := http.NewRequest(http.MethodPost, url, body)
 	if reqErr != nil {
 		return reqErr
@@ -82,13 +83,14 @@ func (rup *RestUp) doRequestToJSON(req *http.Request, out interface{}) error {
 	if getErr != nil {
 		return getErr
 	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("Status: %s", res.Status)
-	}
 
 	body, readErr := ioutil.ReadAll(res.Body)
 	if readErr != nil {
 		return fmt.Errorf("Error reading body: %s", readErr)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("Status: %s\nBody  : %s", res.Status, body)
 	}
 
 	jsonErr := json.Unmarshal(body, out)
