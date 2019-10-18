@@ -10,6 +10,18 @@ import (
 	"time"
 )
 
+// RequestError returns the error context of a failed POST call
+type RequestError struct {
+	Method    string
+	URL       string
+	Body      string
+	HTTPError error
+}
+
+func (e RequestError) Error() string {
+	return fmt.Sprintf("error in restup request.\nMethod : %v\nURL   : %v\n%v\n", e.Method, e.URL, e.Body)
+}
+
 // RestUp ...
 type RestUp struct {
 	baseURL   string
@@ -54,7 +66,16 @@ func (rup *RestUp) Get(action string, out interface{}) error {
 	req.Header.Set("Authorization", rup.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
-	return rup.doRequestToJSON(req, out)
+	err := rup.doRequestToJSON(req, out)
+	if err == nil {
+		return nil
+	}
+	return RequestError{
+		Method:    "GET",
+		URL:       url,
+		Body:      err.Error(),
+		HTTPError: err,
+	}
 }
 
 // Post performs the requested API Post returning the results as JSON
@@ -74,7 +95,16 @@ func (rup *RestUp) Post(action string, query interface{}, out interface{}) error
 	req.Header.Set("Authorization", rup.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
-	return rup.doRequestToJSON(req, out)
+	err := rup.doRequestToJSON(req, out)
+	if err == nil {
+		return nil
+	}
+	return RequestError{
+		Method:    "POST",
+		URL:       url,
+		Body:      err.Error(),
+		HTTPError: err,
+	}
 }
 
 func (rup *RestUp) doRequestToJSON(req *http.Request, out interface{}) error {
